@@ -1265,9 +1265,71 @@
             height: 15px;
             border-radius: 50%;
         }
+
+        /* NOTIFICATION TOAST */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .notification {
+            background: white;
+            color: #333;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 250px;
+            animation: slideIn 0.3s ease;
+            border-left: 4px solid #4caf50;
+        }
+
+        .notification.error {
+            border-left-color: #f44336;
+        }
+
+        .notification.warning {
+            border-left-color: #ff9800;
+        }
+
+        .notification.info {
+            border-left-color: #2196f3;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification.fade-out {
+            animation: fadeOut 0.3s ease forwards;
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateX(400px);
+            }
+        }
     </style>
 </head>
 <body class="theme-default">
+    <!-- Notification container -->
+    <div class="notification-container" id="notificationContainer"></div>
+
     <!-- Background animations -->
     <div class="bg-animation" id="bgAnimation"></div>
 
@@ -1327,11 +1389,11 @@
 
         <!-- Theme selector -->
         <div class="theme-selector">
-            <button class="theme-btn theme-default active" onclick="setTheme('default')">🎨 Classico</button>
-            <button class="theme-btn theme-cyber" onclick="setTheme('cyberpunk')">🤖 Cyberpunk</button>
-            <button class="theme-btn theme-nat" onclick="setTheme('nature')">🌿 Natura</button>
-            <button class="theme-btn theme-sp" onclick="setTheme('space')">🚀 Spazio</button>
-            <button class="theme-btn theme-oc" onclick="setTheme('ocean')">🌊 Oceano</button>
+            <button class="theme-btn theme-default active" onclick="setTheme('default', this)">🎨 Classico</button>
+            <button class="theme-btn theme-cyber" onclick="setTheme('cyberpunk', this)">🤖 Cyberpunk</button>
+            <button class="theme-btn theme-nat" onclick="setTheme('nature', this)">🌿 Natura</button>
+            <button class="theme-btn theme-sp" onclick="setTheme('space', this)">🚀 Spazio</button>
+            <button class="theme-btn theme-oc" onclick="setTheme('ocean', this)">🌊 Oceano</button>
         </div>
 
         <!-- Stats -->
@@ -1404,11 +1466,11 @@
                 </div>
             </div>
             <div class="controls">
-                <button class="btn btn-primary" id="startBtn" onclick="startGame()">🎮 Inizia</button>
-                <button class="btn btn-secondary" onclick="resetGame()">🔄 Reset</button>
-                <button class="btn btn-secondary" onclick="toggleKeyboard()">⌨️ Tastiera</button>
-                <button class="btn btn-secondary" onclick="showShop()">🛍️ Negozio</button>
-                <button class="btn btn-secondary" onclick="showAchievements()">🏆 Trofei</button>
+                <button class="btn btn-primary" id="startBtn" onclick="startGame()">Inizia</button>
+                <button class="btn btn-secondary" onclick="resetGame()">Reset</button>
+                <button class="btn btn-secondary" onclick="toggleKeyboard()">Tastiera</button>
+                <button class="btn btn-secondary" onclick="showShop()">Negozio</button>
+                <button class="btn btn-secondary" onclick="showAchievements()">Trofei</button>
             </div>
         </div>
 
@@ -1544,42 +1606,58 @@
                 <div class="category-card selected" data-category="generale">
                     <div class="category-icon">📝</div>
                     <div class="category-title">Generale</div>
-                    <div class="category-count">50+ testi</div>
+                    <div class="category-count">18 testi (5C+7M+6L)</div>
                 </div>
                 <div class="category-card" data-category="business">
                     <div class="category-icon">💼</div>
                     <div class="category-title">Business</div>
-                    <div class="category-count">30+ testi</div>
+                    <div class="category-count">18 testi (5C+6M+7L)</div>
                 </div>
                 <div class="category-card" data-category="programmazione">
                     <div class="category-icon">💻</div>
                     <div class="category-title">Programmazione</div>
-                    <div class="category-count">25+ testi</div>
+                    <div class="category-count">18 testi (5C+6M+7L)</div>
                 </div>
                 <div class="category-card" data-category="letteratura">
                     <div class="category-icon">📖</div>
                     <div class="category-title">Letteratura</div>
-                    <div class="category-count">40+ testi</div>
+                    <div class="category-count">17 testi (5C+5M+7L)</div>
                 </div>
                 <div class="category-card" data-category="giornalismo">
                     <div class="category-icon">📰</div>
                     <div class="category-title">Giornalismo</div>
-                    <div class="category-count">35+ testi</div>
+                    <div class="category-count">17 testi (5C+5M+7L)</div>
                 </div>
                 <div class="category-card" data-category="scientifico">
                     <div class="category-icon">🔬</div>
                     <div class="category-title">Scientifico</div>
-                    <div class="category-count">20+ testi</div>
+                    <div class="category-count">17 testi (5C+5M+7L)</div>
+                </div>
+                <div class="category-card" data-category="custom">
+                    <div class="category-icon">📁</div>
+                    <div class="category-title">Testi Personalizzati</div>
+                    <div class="category-count" id="customTextsCount">0 testi</div>
                 </div>
             </div>
 
             <div class="import-area" onclick="document.getElementById('fileInput').click()">
                 <h3>📁 Importa Testo Personalizzato</h3>
                 <p>Clicca per selezionare un file PDF o TXT</p>
+                <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                    ℹ️ Dopo il caricamento, il file verrà automaticamente selezionato e potrai usarlo cliccando "Inizia"
+                </p>
                 <input type="file" id="fileInput" class="file-input" accept=".txt,.pdf" onchange="handleFileImport(event)">
             </div>
 
             <div class="custom-texts" id="customTexts"></div>
+
+            <div id="customTextStatus" style="display: none; padding: 15px; background: #e8f5e9; border-radius: 10px; margin-top: 20px;">
+                <h3 style="color: #2e7d32; margin: 0 0 10px 0;">✅ Testi Personalizzati Pronti</h3>
+                <p style="margin: 0; color: #666;">
+                    <strong id="customSentenceCount">0</strong> frasi disponibili dal tuo file.
+                    <br>Clicca "🎮 Inizia" nella sezione Pratica per usarle!
+                </p>
+            </div>
         </div>
 
         <!-- Keyboard Display -->
@@ -1720,6 +1798,7 @@
     </audio>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
         // Game state
         let gameState = {
@@ -1789,51 +1868,153 @@
         // Text database by category
         const textDatabase = {
             generale: [
-                "Il gatto corre veloce nel giardino verde.",
-                "La programmazione richiede pazienza e dedizione costante.",
-                "Nella vita bisogna sempre credere nei propri sogni.",
-                "L'intelligenza artificiale sta cambiando il mondo moderno.",
-                "Praticare ogni giorno migliora le tue abilità di battitura.",
-                "Il sole splende luminoso nel cielo azzurro di questa mattina.",
-                "La musica classica ha il potere di rilassare mente e corpo.",
-                "Il libro che sto leggendo è davvero interessante e coinvolgente.",
-                "Durante le vacanze estive amo passeggiare lungo la spiaggia.",
-                "La tecnologia moderna semplifica molte attività quotidiane."
+                // CORTI (< 60 caratteri)
+                "Il gatto corre veloce.",
+                "La musica è bella.",
+                "Oggi fa bel tempo.",
+                "Leggo un libro interessante.",
+                "Mi piace camminare nel parco.",
+
+                // MEDI (60-120 caratteri)
+                "La programmazione richiede pazienza e dedizione costante per ottenere buoni risultati.",
+                "Nella vita bisogna sempre credere nei propri sogni e non arrendersi mai alle difficoltà.",
+                "L'intelligenza artificiale sta cambiando il mondo moderno in modo rapido e profondo.",
+                "Praticare ogni giorno migliora le tue abilità di battitura e aumenta la velocità.",
+                "Il sole splende luminoso nel cielo azzurro di questa mattina primaverile e serena.",
+                "La musica classica ha il potere di rilassare mente e corpo dopo una giornata stressante.",
+                "Durante le vacanze estive amo passeggiare lungo la spiaggia e guardare il tramonto.",
+
+                // LUNGHI (> 120 caratteri)
+                "Imparare una nuova lingua apre la mente a nuove culture, opportunità interessanti e permette di comunicare con persone di tutto il mondo creando legami profondi.",
+                "La natura offre paesaggi mozzafiato che ispirano artisti e fotografi di tutto il mondo, regalando emozioni uniche e irripetibili che rimangono impresse nella memoria.",
+                "L'esercizio fisico regolare contribuisce al benessere generale del corpo e della mente, migliorando la qualità della vita e prevenendo numerose malattie croniche.",
+                "La lettura stimola l'immaginazione, arricchisce il vocabolario in modo significativo e permette di viaggiare con la mente verso mondi fantastici e realtà sconosciute.",
+                "L'amicizia vera si basa sulla fiducia reciproca, sul sostegno nei momenti difficili della vita e sulla capacità di condividere gioie e dolori senza giudizio.",
+                "Viaggiare permette di scoprire nuovi luoghi, culture diverse, tradizioni affascinanti e di creare ricordi indimenticabili che arricchiscono la propria esperienza di vita.",
+                "La cucina italiana è famosa nel mondo per la sua varietà di piatti tradizionali, saporiti e genuini che rappresentano l'eccellenza gastronomica e la passione culinaria.",
+                "Il tempo libero dovrebbe essere dedicato alle proprie passioni, agli hobby che ci rendono felici e alle attività che permettono di esprimere la propria creatività personale."
             ],
             business: [
-                "La strategia aziendale deve essere allineata agli obiettivi di mercato.",
-                "Il ROI di questo progetto supera le aspettative iniziali del management.",
-                "La presentazione al board di amministrazione è prevista per martedì.",
-                "Le vendite del primo trimestre mostrano una crescita del venti percento.",
-                "Il customer service rappresenta un elemento chiave per la fidelizzazione."
+                // CORTI (< 60 caratteri)
+                "Il ROI è positivo.",
+                "Meeting alle tre.",
+                "Budget approvato oggi.",
+                "Vendite in crescita.",
+                "Team molto produttivo.",
+
+                // MEDI (60-120 caratteri)
+                "La strategia aziendale deve essere allineata agli obiettivi di mercato per avere successo.",
+                "Il ROI di questo progetto supera le aspettative iniziali del management e degli investitori.",
+                "Le vendite del primo trimestre mostrano una crescita del venti percento rispetto all'anno scorso.",
+                "Il customer service rappresenta un elemento chiave per la fidelizzazione dei clienti.",
+                "Il budget annuale deve essere approvato entro la fine del mese corrente dalla direzione.",
+                "Il marketing digitale è fondamentale per raggiungere il target di riferimento moderno online.",
+
+                // LUNGHI (> 120 caratteri)
+                "La presentazione al board di amministrazione è prevista per martedì prossimo e richiederà una preparazione accurata di tutti i dati finanziari e strategici dell'azienda.",
+                "Il report trimestrale evidenzia un incremento significativo della produttività aziendale grazie all'implementazione di nuovi processi e tecnologie innovative nel flusso di lavoro.",
+                "La negoziazione del contratto richiede attenzione ai dettagli, competenze specifiche e una profonda conoscenza delle dinamiche di mercato per ottenere condizioni vantaggiose.",
+                "La gestione delle risorse umane influenza direttamente il successo organizzativo attraverso la selezione, formazione e motivazione dei talenti all'interno dell'azienda.",
+                "Il piano di espansione internazionale prevede l'apertura di cinque nuove sedi operative in Europa e Asia per consolidare la presenza globale del brand sul mercato.",
+                "L'analisi SWOT fornisce una panoramica completa dei punti di forza, debolezza, opportunità e minacce aziendali per sviluppare strategie competitive efficaci.",
+                "La supply chain deve essere ottimizzata per ridurre i costi operativi, migliorare l'efficienza logistica e garantire tempi di consegna rapidi ai clienti finali."
             ],
             programmazione: [
+                // CORTI (< 60 caratteri)
+                "let x = 10;",
+                "const name = 'Mario';",
+                "return true;",
+                "console.log('Hello');",
+                "const arr = [1, 2, 3];",
+
+                // MEDI (60-120 caratteri)
                 "function calculateSum(a, b) { return a + b; }",
                 "const user = { name: 'Mario', age: 30, city: 'Milano' };",
                 "if (condition === true) { console.log('Condizione verificata'); }",
                 "for (let i = 0; i < array.length; i++) { processItem(array[i]); }",
-                "import React from 'react'; export default function App() {}"
+                "const numbers = [1, 2, 3, 4, 5].map(n => n * 2).filter(n => n > 5);",
+                "class Animal { constructor(name) { this.name = name; } }",
+
+                // LUNGHI (> 120 caratteri)
+                "async function fetchData() { const response = await fetch(url); if (!response.ok) throw new Error('Failed'); return response.json(); }",
+                "const handleClick = (event) => { event.preventDefault(); const data = event.target.dataset; console.log('Clicked:', data); updateState(data); };",
+                "try { const result = JSON.parse(data); processResult(result); } catch (error) { console.error('Parse error:', error.message); handleError(error); }",
+                "const reducer = (state, action) => { switch(action.type) { case 'INCREMENT': return { ...state, value: state.value + 1 }; default: return state; } };",
+                "interface User { id: number; name: string; email: string; role: 'admin' | 'user'; createdAt: Date; isActive: boolean; }",
+                "const debounce = (func, delay) => { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func(...args), delay); }; };",
+                "export const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000'; export const MAX_RETRIES = parseInt(process.env.MAX_RETRIES) || 3;"
             ],
             letteratura: [
-                "Nel mezzo del cammin di nostra vita mi ritrovai per una selva oscura.",
-                "Era il migliore dei tempi, era il peggiore dei tempi secondo Dickens.",
-                "Chiamatemi Ismaele così inizia il capolavoro di Herman Melville.",
-                "In principio era il Verbo e il Verbo era presso Dio.",
-                "Tutte le famiglie felici si assomigliano fra loro."
+                // CORTI (< 60 caratteri)
+                "Era una notte buia.",
+                "Il mare era calmo.",
+                "Chiamatemi Ismaele.",
+                "In principio era il Verbo.",
+                "Tutte le famiglie felici.",
+
+                // MEDI (60-120 caratteri)
+                "Nel mezzo del cammin di nostra vita mi ritrovai per una selva oscura che la diritta via.",
+                "Era il migliore dei tempi, era il peggiore dei tempi secondo il grande Charles Dickens.",
+                "Il fu Mattia Pascal è uno dei capolavori della letteratura italiana del Novecento moderno.",
+                "La divina commedia è strutturata in tre cantiche principali: Inferno, Purgatorio e Paradiso.",
+                "L'Orlando furioso di Ludovico Ariosto celebra le gesta dei paladini di Francia medievali.",
+
+                // LUNGHI (> 120 caratteri)
+                "L'amore ai tempi del colera narra una storia romantica che attraversa decenni e continenti, esplorando la persistenza dell'amore vero attraverso il tempo e le difficoltà.",
+                "I promessi sposi rappresenta il romanzo storico più importante della letteratura italiana, descrivendo la vita nel Seicento lombardo con precisione storica e passione narrativa.",
+                "Cent'anni di solitudine è un esempio magistrale di realismo magico latinoamericano che racconta la saga della famiglia Buendía attraverso generazioni e destini intrecciati.",
+                "Il nome della rosa unisce il mistero medievale alla riflessione filosofica e teologica, creando un capolavoro letterario che esplora fede, ragione e conoscenza umana.",
+                "Le avventure di Pinocchio rappresentano una pietra miliare della letteratura per ragazzi italiana, narrando la trasformazione di un burattino ribelle in un bambino vero.",
+                "Il Gattopardo descrive la Sicilia durante il Risorgimento con straordinaria profondità psicologica, mostrando come tutto deve cambiare affinché tutto rimanga uguale.",
+                "Uno, nessuno e centomila esplora il tema dell'identità e della percezione di sé attraverso la crisi esistenziale del protagonista Vitangelo Moscarda e la sua ricerca."
             ],
             giornalismo: [
-                "Il Presidente ha annunciato oggi nuove misure economiche straordinarie.",
-                "La squadra locale ha vinto il campionato dopo una stagione emozionante.",
-                "Gli scienziati hanno scoperto una nuova specie marina nell'Oceano Pacifico.",
-                "Il mercato azionario ha registrato oggi il massimo storico dell'anno.",
-                "La conferenza sul clima si è conclusa con accordi importanti per il futuro."
+                // CORTI (< 60 caratteri)
+                "Nuovo record mondiale.",
+                "Elezioni il prossimo mese.",
+                "Il museo apre oggi.",
+                "Borsa in forte crescita.",
+                "Accordo storico raggiunto.",
+
+                // MEDI (60-120 caratteri)
+                "Il Presidente ha annunciato oggi nuove misure economiche straordinarie per la ripresa del paese.",
+                "La squadra locale ha vinto il campionato dopo una stagione emozionante e molto combattuta.",
+                "Gli scienziati hanno scoperto una nuova specie marina nell'Oceano Pacifico durante una spedizione.",
+                "Il mercato azionario ha registrato oggi il massimo storico dell'anno con grande entusiasmo.",
+                "Il nuovo museo d'arte contemporanea apre le porte al pubblico questo weekend con mostre esclusive.",
+
+                // LUNGHI (> 120 caratteri)
+                "La conferenza sul clima si è conclusa con accordi importanti per il futuro del pianeta, impegnando i paesi a ridurre le emissioni di gas serra entro il 2030.",
+                "La tecnologia 5G sta trasformando il modo in cui comunichiamo e lavoriamo quotidianamente, offrendo velocità di connessione senza precedenti e nuove opportunità digitali.",
+                "Il festival del cinema presenta quest'anno una selezione di film internazionali straordinari provenienti da oltre cinquanta paesi con registi emergenti e affermati.",
+                "L'economia globale mostra segnali di ripresa dopo un periodo di incertezza prolungata causato dalla pandemia, con investimenti in crescita e fiducia dei consumatori.",
+                "Le elezioni politiche si terranno il prossimo mese con un'affluenza prevista molto alta grazie all'interesse crescente dei cittadini verso le questioni sociali.",
+                "Il campione olimpico ha battuto il record mondiale nella gara dei cento metri piani con un tempo straordinario che ha lasciato tutti gli spettatori senza parole.",
+                "La protezione ambientale è diventata una priorità assoluta per i governi di tutto il mondo che stanno implementando politiche sostenibili e investimenti verdi."
             ],
             scientifico: [
-                "La fotosintesi clorofilliana converte l'energia luminosa in energia chimica.",
-                "Il DNA contiene le informazioni genetiche necessarie per lo sviluppo.",
-                "La teoria della relatività di Einstein ha rivoluzionato la fisica moderna.",
-                "I mitocondri sono considerati le centrali energetiche delle cellule.",
-                "La tavola periodica organizza gli elementi chimici per numero atomico."
+                // CORTI (< 60 caratteri)
+                "Il DNA è una doppia elica.",
+                "La gravità attrae i corpi.",
+                "I neuroni trasmettono segnali.",
+                "L'acqua bolle a 100 gradi.",
+                "La luce viaggia veloce.",
+
+                // MEDI (60-120 caratteri)
+                "La fotosintesi clorofilliana converte l'energia luminosa in energia chimica nelle piante verdi.",
+                "Il DNA contiene le informazioni genetiche necessarie per lo sviluppo di tutti gli organismi viventi.",
+                "La teoria della relatività di Einstein ha rivoluzionato la fisica moderna e la nostra comprensione.",
+                "I mitocondri sono considerati le centrali energetiche delle cellule eucariotiche degli organismi.",
+                "La tavola periodica organizza gli elementi chimici per numero atomico in righe e colonne precise.",
+
+                // LUNGHI (> 120 caratteri)
+                "Il sistema solare è composto dal Sole, otto pianeti principali, pianeti nani e numerosi corpi celesti minori come asteroidi, comete e meteoriti distribuiti nello spazio.",
+                "La teoria dell'evoluzione di Darwin spiega l'origine e la diversità delle specie viventi attraverso il processo di selezione naturale e adattamento ambientale nel tempo.",
+                "Le onde elettromagnetiche si propagano nel vuoto alla velocità della luce costante di circa trecentomila chilometri al secondo trasportando energia e informazioni.",
+                "Il cervello umano contiene circa cento miliardi di neuroni interconnessi tra loro attraverso sinapsi che permettono la trasmissione di impulsi elettrici e chimici.",
+                "La chimica organica studia i composti del carbonio e le loro reazioni caratteristiche, fondamentali per comprendere i processi biologici e sintetizzare nuovi materiali.",
+                "Il principio di indeterminazione di Heisenberg pone limiti fondamentali alla precisione con cui possiamo misurare simultaneamente posizione e quantità di moto delle particelle.",
+                "Gli ecosistemi mantengono l'equilibrio ecologico attraverso complesse interazioni tra organismi viventi, flussi di energia e cicli biogeochimici della materia organica."
             ]
         };
 
@@ -2074,36 +2255,105 @@
             document.getElementById('xpText').textContent = `${gameState.playerXP} / ${gameState.playerXPToNext} XP`;
         }
 
-        // Get filtered texts based on difficulty and length
+        // Get filtered texts - VERSIONE SEMPLIFICATA SENZA FALLBACK
         function getFilteredTexts() {
+            console.log('\n=== GET FILTERED TEXTS ===');
             const difficulty = document.getElementById('difficulty').value;
             const textLength = document.getElementById('textLength').value;
+            console.log('Categoria:', gameState.selectedTextCategory);
+            console.log('Difficoltà:', difficulty);
+            console.log('Lunghezza:', textLength);
 
-            let texts = textDatabase[gameState.selectedTextCategory] || textDatabase.generale;
+            // Handle custom texts category - RITORNA TUTTE LE FRASI CUSTOM
+            if (gameState.selectedTextCategory === 'custom') {
+                console.log('→ Using CUSTOM texts');
 
-            // Filter by difficulty
-            if (difficulty === 'facile') {
-                texts = texts.filter(text => text.length < 50);
-            } else if (difficulty === 'difficile') {
-                texts = texts.filter(text => text.includes(',') || text.includes('.') || text.includes('à') || text.includes('è'));
+                if (gameState.customTexts.length === 0) {
+                    console.error('❌ NO CUSTOM TEXTS FOUND!');
+                    alert('Nessun testo personalizzato caricato! Carica un file nella sezione Testi.');
+                    return textDatabase.generale;
+                }
+
+                console.log('Files loaded:', gameState.customTexts.length);
+
+                // Split into sentences
+                let customTextArray = [];
+                gameState.customTexts.forEach((customText, fileIndex) => {
+                    console.log('  Processing file ' + (fileIndex + 1) + ': ' + customText.name);
+
+                    // Split by punctuation
+                    let sentences = customText.content.split(/[.!?]+/);
+                    sentences.forEach(s => {
+                        const trimmed = s.trim();
+                        if (trimmed.length >= 20) {  // Minimum 20 chars
+                            customTextArray.push(trimmed + '.');
+                        }
+                    });
+                });
+
+                console.log('✅ Custom texts split into', customTextArray.length, 'sentences');
+                if (customTextArray.length > 0) {
+                    console.log('First 3 samples:');
+                    customTextArray.slice(0, 3).forEach((t, i) => {
+                        console.log('  ' + (i+1) + '. (' + t.length + ' char) ' + t.substring(0, 60) + '...');
+                    });
+                }
+
+                return customTextArray;
             }
 
-            // Filter by length
+            // Get all texts from selected category
+            let allTexts = textDatabase[gameState.selectedTextCategory];
+            if (!allTexts) {
+                console.error('❌ Category not found:', gameState.selectedTextCategory);
+                allTexts = textDatabase.generale;
+            }
+            console.log('Total texts in category:', allTexts.length);
+
+            // PRIMO: Filtra per LUNGHEZZA (ignorando difficoltà per ora)
+            let filtered = [];
             if (textLength === 'corto') {
-                texts = texts.filter(text => text.length < 80);
+                filtered = allTexts.filter(text => text.length < 60);
+                console.log('→ Filter: LENGTH < 60');
             } else if (textLength === 'lungo') {
-                texts = texts.filter(text => text.length > 120);
-            } else {
-                texts = texts.filter(text => text.length >= 80 && text.length <= 120);
+                filtered = allTexts.filter(text => text.length > 120);
+                console.log('→ Filter: LENGTH > 120');
+            } else { // medio
+                filtered = allTexts.filter(text => text.length >= 60 && text.length <= 120);
+                console.log('→ Filter: LENGTH 60-120');
             }
 
-            return texts.length > 0 ? texts : textDatabase.generale;
+            console.log('After length filter:', filtered.length, 'texts found');
+
+            if (filtered.length > 0) {
+                console.log('Sample lengths:', filtered.map(t => t.length).slice(0, 5));
+            } else {
+                console.error('❌ NO TEXTS MATCH LENGTH FILTER!');
+                console.log('Available lengths:', allTexts.map(t => t.length));
+            }
+
+            return filtered.length > 0 ? filtered : allTexts;
         }
 
         // Start game
         function startGame() {
             const texts = getFilteredTexts();
-            gameState.currentText = texts[Math.floor(Math.random() * texts.length)];
+
+            if (!texts || texts.length === 0) {
+                console.error('❌ NO TEXTS AVAILABLE!');
+                alert('Errore: nessun testo disponibile!');
+                return;
+            }
+
+            const randomIndex = Math.floor(Math.random() * texts.length);
+            gameState.currentText = texts[randomIndex];
+
+            console.log('\n=== GAME STARTED ===');
+            console.log('Selected text ' + (randomIndex + 1) + '/' + texts.length);
+            console.log('Length:', gameState.currentText.length, 'characters');
+            console.log('Text:', gameState.currentText);
+            console.log('==================\n');
+
             gameState.currentIndex = 0;
             gameState.startTime = Date.now();
             gameState.errors = 0;
@@ -2118,11 +2368,6 @@
             input.disabled = false;
             input.value = '';
             input.focus();
-
-            console.log('GAME STARTED');
-            console.log('Text:', gameState.currentText);
-            console.log('Active:', gameState.isActive);
-            console.log('Input element:', input);
 
             updateTextDisplay();
             updateMascot('normal');
@@ -2186,7 +2431,7 @@
         }
 
         // Set theme
-        function setTheme(theme) {
+        function setTheme(theme, buttonElement) {
             document.body.className = `theme-${theme}`;
             gameState.currentTheme = theme;
 
@@ -2194,12 +2439,15 @@
             document.querySelectorAll('.theme-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            event.target.classList.add('active');
+            if (buttonElement) {
+                buttonElement.classList.add('active');
+            }
 
             // Initialize theme-specific effects
             initializeThemeEffects();
 
             saveGameState();
+            saveUserPreferences();
         }
 
         // Initialize theme effects
@@ -2366,6 +2614,10 @@
 
         // Navigation functions
         function switchSection(sectionName) {
+            console.log('\n--- SWITCH SECTION ---');
+            console.log('From:', gameState.currentSection, '→ To:', sectionName);
+            console.log('Current category:', gameState.selectedTextCategory);
+
             gameState.currentSection = sectionName;
 
             // Update nav buttons
@@ -2379,6 +2631,9 @@
             if (sectionName === 'analytics') {
                 updateAnalytics();
             }
+
+            console.log('Section switched. Category still:', gameState.selectedTextCategory);
+            console.log('--------------------\n');
         }
 
         // Analytics functions
@@ -2536,46 +2791,151 @@
         }
 
         // Text category functions
-        function selectTextCategory(category) {
+        function selectTextCategory(category, cardElement) {
             gameState.selectedTextCategory = category;
 
             // Update UI
             document.querySelectorAll('.category-card').forEach(card => {
                 card.classList.remove('selected');
             });
-            event.target.closest('.category-card').classList.add('selected');
+            if (cardElement) {
+                cardElement.classList.add('selected');
+            }
+
+            saveUserPreferences();
         }
 
         // File import functions
-        function handleFileImport(event) {
+        async function handleFileImport(event) {
             const file = event.target.files[0];
             if (!file) return;
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const text = e.target.result;
-                const customText = {
-                    id: Date.now(),
-                    name: file.name,
-                    content: text.substring(0, 1000), // Limit to 1000 characters
-                    date: new Date().toLocaleDateString()
-                };
-
-                gameState.customTexts.push(customText);
-                updateCustomTextsUI();
-                saveGameState();
-            };
+            console.log('📂 File selected:', file.name, 'Type:', file.type);
 
             if (file.type === 'text/plain') {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const text = e.target.result;
+                    console.log('📄 File read, length:', text.length);
+
+                    if (text.trim().length < 10) {
+                        alert('Il file è troppo corto! Inserisci un testo di almeno 10 caratteri.');
+                        return;
+                    }
+                    const customText = {
+                        id: Date.now(),
+                        name: file.name,
+                        content: text.substring(0, 5000), // Limit to 5000 characters
+                        date: new Date().toLocaleDateString()
+                    };
+
+                    gameState.customTexts.push(customText);
+
+                    console.log('\n=== FILE TXT CARICATO ===');
+                    console.log('Nome file:', customText.name);
+                    console.log('Lunghezza:', customText.content.length, 'caratteri');
+                    console.log('Contenuto (primi 100):', customText.content.substring(0, 100));
+                    console.log('Totale file custom:', gameState.customTexts.length);
+
+                    updateCustomTextsUI();
+                    saveGameState();
+
+                    // Auto-select custom category
+                    gameState.selectedTextCategory = 'custom';
+                    console.log('✅ gameState.selectedTextCategory = "custom"');
+
+                    document.querySelectorAll('.category-card').forEach(card => {
+                        card.classList.remove('selected');
+                    });
+                    const customCard = document.querySelector('[data-category="custom"]');
+                    if (customCard) {
+                        customCard.classList.add('selected');
+                        console.log('✅ Card "Testi Personalizzati" selezionata visivamente');
+                    }
+
+                    // Show status
+                    showCustomTextStatus();
+                    console.log('======================\n');
+
+                    showNotification('✅ File caricato! Vai su Pratica e premi Inizia.');
+                };
                 reader.readAsText(file);
             } else if (file.type === 'application/pdf') {
-                // For PDF, we'll just show a message for now
-                alert('Supporto PDF in sviluppo! Usa file TXT per ora.');
+                try {
+                    showNotification('📄 Caricamento PDF in corso...');
+                    const arrayBuffer = await file.arrayBuffer();
+
+                    // Configure PDF.js worker
+                    if (typeof pdfjsLib !== 'undefined') {
+                        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+                        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                        let fullText = '';
+
+                        // Extract text from all pages (max 10 pages)
+                        const numPages = Math.min(pdf.numPages, 10);
+                        for (let i = 1; i <= numPages; i++) {
+                            const page = await pdf.getPage(i);
+                            const textContent = await page.getTextContent();
+                            const pageText = textContent.items.map(item => item.str).join(' ');
+                            fullText += pageText + ' ';
+                        }
+
+                        if (fullText.trim().length < 10) {
+                            alert('Il PDF non contiene testo leggibile o è troppo corto!');
+                            return;
+                        }
+
+                        const customText = {
+                            id: Date.now(),
+                            name: file.name,
+                            content: fullText.trim().substring(0, 5000),
+                            date: new Date().toLocaleDateString()
+                        };
+
+                        gameState.customTexts.push(customText);
+                        console.log('💾 PDF saved to gameState.customTexts');
+                        console.log('Total custom texts:', gameState.customTexts.length);
+                        console.log('PDF content preview:', customText.content.substring(0, 100));
+
+                        updateCustomTextsUI();
+                        saveGameState();
+
+                        // Auto-select custom category
+                        gameState.selectedTextCategory = 'custom';
+                        document.querySelectorAll('.category-card').forEach(card => {
+                            card.classList.remove('selected');
+                        });
+                        const customCard = document.querySelector('[data-category="custom"]');
+                        if (customCard) {
+                            customCard.classList.add('selected');
+                            console.log('✅ Auto-selected custom category');
+                        }
+
+                        // Show status with sentence count
+                        showCustomTextStatus();
+                        showNotification('✅ PDF caricato e pronto!');
+                    } else {
+                        alert('Errore: PDF.js non è stato caricato correttamente. Ricarica la pagina e riprova.');
+                    }
+                } catch (error) {
+                    console.error('Error loading PDF:', error);
+                    alert('Errore durante il caricamento del PDF: ' + error.message);
+                }
+            } else {
+                alert('Formato file non supportato! Usa file TXT o PDF.');
             }
         }
 
         function updateCustomTextsUI() {
             const container = document.getElementById('customTexts');
+            const countElement = document.getElementById('customTextsCount');
+
+            // Update count in category card
+            if (countElement) {
+                const count = gameState.customTexts.length;
+                countElement.textContent = `${count} ${count === 1 ? 'testo' : 'testi'}`;
+            }
 
             if (gameState.customTexts.length === 0) {
                 container.innerHTML = '';
@@ -2616,9 +2976,13 @@
             document.querySelectorAll('.category-card').forEach(card => {
                 card.addEventListener('click', function() {
                     const category = this.dataset.category;
-                    selectTextCategory(category);
+                    selectTextCategory(category, this);
                 });
             });
+
+            // Save preferences when dropdowns change
+            document.getElementById('difficulty').addEventListener('change', saveUserPreferences);
+            document.getElementById('textLength').addEventListener('change', saveUserPreferences);
         }
 
         // Modified init function
@@ -2630,6 +2994,58 @@
             initializeThemeEffects();
             updateCustomTextsUI();
             updateHeatmap();
+            loadUserPreferences();
+            showCustomTextStatus(); // Show if custom texts are loaded
+        }
+
+        // Save and load user preferences
+        function saveUserPreferences() {
+            const preferences = {
+                difficulty: document.getElementById('difficulty').value,
+                textLength: document.getElementById('textLength').value,
+                theme: gameState.currentTheme,
+                category: gameState.selectedTextCategory
+            };
+            localStorage.setItem('typingGamePreferences', JSON.stringify(preferences));
+        }
+
+        function loadUserPreferences() {
+            const saved = localStorage.getItem('typingGamePreferences');
+            if (saved) {
+                try {
+                    const preferences = JSON.parse(saved);
+
+                    // Restore dropdown values
+                    if (preferences.difficulty) {
+                        document.getElementById('difficulty').value = preferences.difficulty;
+                    }
+                    if (preferences.textLength) {
+                        document.getElementById('textLength').value = preferences.textLength;
+                    }
+
+                    // Restore theme
+                    if (preferences.theme && preferences.theme !== gameState.currentTheme) {
+                        const themeBtn = document.querySelector(`[onclick*="setTheme('${preferences.theme}')"]`);
+                        if (themeBtn) {
+                            setTheme(preferences.theme, themeBtn);
+                        }
+                    }
+
+                    // Restore category selection
+                    if (preferences.category) {
+                        gameState.selectedTextCategory = preferences.category;
+                        const categoryCard = document.querySelector(`[data-category="${preferences.category}"]`);
+                        if (categoryCard) {
+                            document.querySelectorAll('.category-card').forEach(card => {
+                                card.classList.remove('selected');
+                            });
+                            categoryCard.classList.add('selected');
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error loading preferences:', e);
+                }
+            }
         }
 
         // Rhythm and consistency analysis functions
@@ -2723,6 +3139,65 @@
             if (trend > 5) return '📈 Miglioramento';
             if (trend < -5) return '📉 In calo';
             return '📊 Stabile';
+        }
+
+        // Notification system
+        function showNotification(message, type = 'success') {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+
+            container.appendChild(notification);
+
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                notification.classList.add('fade-out');
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        // Show custom text status
+        function showCustomTextStatus() {
+            if (gameState.customTexts.length === 0) {
+                document.getElementById('customTextStatus').style.display = 'none';
+                return;
+            }
+
+            // Calculate how many sentences will be generated
+            let sentenceCount = 0;
+            gameState.customTexts.forEach(customText => {
+                let sentences = customText.content.split(/[.!?]\s+/);
+                if (sentences.length <= 1) {
+                    // Count chunks
+                    const words = customText.content.split(/\s+/);
+                    let chunk = '';
+                    words.forEach(word => {
+                        if ((chunk + word).length > 100 && chunk.length > 0) {
+                            sentenceCount++;
+                            chunk = word + ' ';
+                        } else {
+                            chunk += word + ' ';
+                        }
+                    });
+                    if (chunk.trim().length > 0) {
+                        sentenceCount++;
+                    }
+                } else {
+                    sentences.forEach(s => {
+                        if (s.trim().length >= 10) {
+                            sentenceCount++;
+                        }
+                    });
+                }
+            });
+
+            document.getElementById('customSentenceCount').textContent = sentenceCount;
+            document.getElementById('customTextStatus').style.display = 'block';
+
+            console.log('📊 Status: ' + sentenceCount + ' frasi generate da ' + gameState.customTexts.length + ' file');
         }
 
         // Initialize on load
