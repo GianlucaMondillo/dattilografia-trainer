@@ -1238,6 +1238,55 @@
             border-color: #4caf50;
         }
 
+        /* Illuminazione tasti per colore dito */
+        .key.active-purple {
+            background: #9c27b0 !important;
+            color: white !important;
+            box-shadow: 0 0 20px rgba(156, 39, 176, 0.8);
+            border-color: #9c27b0 !important;
+            transform: scale(1.1);
+        }
+
+        .key.active-blue {
+            background: #2196f3 !important;
+            color: white !important;
+            box-shadow: 0 0 20px rgba(33, 150, 243, 0.8);
+            border-color: #2196f3 !important;
+            transform: scale(1.1);
+        }
+
+        .key.active-green {
+            background: #4caf50 !important;
+            color: white !important;
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.8);
+            border-color: #4caf50 !important;
+            transform: scale(1.1);
+        }
+
+        .key.active-yellow {
+            background: #ffeb3b !important;
+            color: #333 !important;
+            box-shadow: 0 0 20px rgba(255, 235, 59, 0.8);
+            border-color: #ffeb3b !important;
+            transform: scale(1.1);
+        }
+
+        .key.active-orange {
+            background: #ff9800 !important;
+            color: white !important;
+            box-shadow: 0 0 20px rgba(255, 152, 0, 0.8);
+            border-color: #ff9800 !important;
+            transform: scale(1.1);
+        }
+
+        .key.active-red {
+            background: #f44336 !important;
+            color: white !important;
+            box-shadow: 0 0 20px rgba(244, 67, 54, 0.8);
+            border-color: #f44336 !important;
+            transform: scale(1.1);
+        }
+
         .finger-zone {
             position: absolute;
             bottom: 2px;
@@ -1468,7 +1517,6 @@
             <div class="controls">
                 <button class="btn btn-primary" id="startBtn" onclick="startGame()">Inizia</button>
                 <button class="btn btn-secondary" onclick="resetGame()">Reset</button>
-                <button class="btn btn-secondary" onclick="toggleKeyboard()">Tastiera</button>
                 <button class="btn btn-secondary" onclick="showShop()">Negozio</button>
                 <button class="btn btn-secondary" onclick="showAchievements()">Trofei</button>
             </div>
@@ -1661,7 +1709,7 @@
         </div>
 
         <!-- Keyboard Display -->
-        <div class="keyboard-container" id="keyboardContainer" style="display: none;">
+        <div class="keyboard-container" id="keyboardContainer">
             <div class="keyboard-toggle">
                 <h3>🎯 Guida Tastiera - Zone delle Dita</h3>
             </div>
@@ -2108,6 +2156,15 @@
         function setupEventListeners() {
             const input = document.getElementById('typingInput');
             input.addEventListener('input', handleTyping);
+
+            // Keyboard visual feedback
+            document.addEventListener('keydown', function(e) {
+                highlightKey(e.key, true);
+            });
+
+            document.addEventListener('keyup', function(e) {
+                highlightKey(e.key, false);
+            });
         }
 
 
@@ -2568,17 +2625,54 @@
         }
 
         function highlightKey(key, pressed) {
+            console.log('highlightKey called - key:', key, 'pressed:', pressed);
+
             // Clean up key name for matching
             const cleanKey = key.toLowerCase();
-            const keyElement = document.querySelector(`[data-key="${key}"]`) ||
-                              document.querySelector(`[data-key="${cleanKey}"]`);
+            console.log('Looking for key:', key, 'or', cleanKey);
+
+            // IMPORTANTE: cerca SOLO nella tastiera visuale, non nella heatmap!
+            const keyElement = document.querySelector('.keyboard .key[data-key="' + key + '"]') ||
+                              document.querySelector('.keyboard .key[data-key="' + cleanKey + '"]');
+
+            console.log('Found element:', keyElement);
 
             if (keyElement) {
                 if (pressed) {
-                    keyElement.classList.add('pressed');
+                    // Get finger color from emoji
+                    const fingerZone = keyElement.querySelector('.finger-zone');
+                    console.log('Finger zone:', fingerZone);
+                    let colorClass = 'pressed'; // fallback
+
+                    if (fingerZone) {
+                        const emoji = fingerZone.textContent.trim();
+                        console.log('Emoji found:', emoji);
+                        const colorMap = {
+                            '🟣': 'active-purple',
+                            '🔵': 'active-blue',
+                            '🟢': 'active-green',
+                            '🟡': 'active-yellow',
+                            '🟠': 'active-orange',
+                            '🔴': 'active-red'
+                        };
+                        colorClass = colorMap[emoji] || 'pressed';
+                        console.log('Color class:', colorClass);
+                    }
+
+                    keyElement.classList.add(colorClass);
+                    console.log('Added class:', colorClass);
+
+                    // Auto-remove after 200ms
+                    setTimeout(function() {
+                        keyElement.classList.remove(colorClass);
+                    }, 200);
                 } else {
-                    keyElement.classList.remove('pressed');
+                    // Remove all possible color classes
+                    keyElement.classList.remove('pressed', 'active-purple', 'active-blue',
+                        'active-green', 'active-yellow', 'active-orange', 'active-red');
                 }
+            } else {
+                console.log('❌ Key element NOT FOUND for:', key);
             }
         }
 
@@ -2825,7 +2919,7 @@
                     const customText = {
                         id: Date.now(),
                         name: file.name,
-                        content: text.substring(0, 5000), // Limit to 5000 characters
+                        content: text, // No limit - use entire file
                         date: new Date().toLocaleDateString()
                     };
 
@@ -2872,8 +2966,8 @@
                         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
                         let fullText = '';
 
-                        // Extract text from all pages (max 10 pages)
-                        const numPages = Math.min(pdf.numPages, 10);
+                        // Extract text from all pages (max 50 pages for performance)
+                        const numPages = Math.min(pdf.numPages, 50);
                         for (let i = 1; i <= numPages; i++) {
                             const page = await pdf.getPage(i);
                             const textContent = await page.getTextContent();
@@ -2889,7 +2983,7 @@
                         const customText = {
                             id: Date.now(),
                             name: file.name,
-                            content: fullText.trim().substring(0, 5000),
+                            content: fullText.trim(), // No limit - use all extracted text
                             date: new Date().toLocaleDateString()
                         };
 
